@@ -1,0 +1,15 @@
+*.iml
+.idea
+*.swp
+.DS_Store
+*.pyc
+.scannerwork
+.scannerwork/*
+.DS_Store
+.idea/
+/target/
+/logs/
+/ueditor/jsp/upload/
+.classpath
+.settings
+.project

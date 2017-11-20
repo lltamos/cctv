@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:redisson="http://redisson.org/schema/redisson"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+           http://www.springframework.org/schema/beans/spring-beans.xsd  
+           http://www.springframework.org/schema/context  
+           http://www.springframework.org/schema/context/spring-context.xsd  
+           http://redisson.org/schema/redisson  
+           http://redisson.org/schema/redisson/redisson.xsd">
+	
+
+	<!-- redis集群配置 -->
+	<redisson:client id="redissonClient">
+		<redisson:cluster-servers  idle-connection-timeout="10000" ping-timeout="1000" connect-timeout="10000"
+			
+			timeout="3000" retry-attempts="3" retry-interval="1500"
+			
+			reconnection-timeout="3000" failed-attempts="3"
+			
+			subscriptions-per-connection="5"
+			
+			client-name="none"
+			
+			subscription-connection-minimum-idle-size="64"
+			
+			subscription-connection-pool-size="256"
+			
+			slave-connection-minimum-idle-size="64" slave-connection-pool-size="256"
+			
+			master-connection-minimum-idle-size="64" master-connection-pool-size="256"
+			
+			read-mode="MASTER" subscription-mode="MASTER" scan-interval="1000">  <!--  //scan-interval:集群状态扫描间隔时间，单位是毫秒 -->
+			<redisson:node-address value="192.168.1.24:7000"/>
+		</redisson:cluster-servers>
+	</redisson:client>
+</beans>

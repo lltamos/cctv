@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context-3.2.xsd
+          http://www.springframework.org/schema/aop 
+		  http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+          http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+          http://code.alibabatech.com/schema/dubbo classpath:dubbo.xsd">
+	
+	<description>spring配置文件</description>
+	
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="order" value="1" />
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="location">
+			<value>classpath:server.properties</value>
+		</property>
+		
+	</bean>
+	
+	<import resource="spring/spring-db-mysql.xml" />
+	
+	<bean id="sqlMapClientRead" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocations">
+			<list>
+				<value>classpath:spring/sqlMapConfig.xml</value>
+			</list>
+		</property>
+		<property name="dataSource" ref="dataSourcebase" />
+	</bean>
+
+	<bean id="sqlMapClientWrite" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocations">
+			<list>
+				<value>classpath:spring/sqlMapConfig.xml</value>
+			</list>
+		</property>
+		<property name="dataSource" ref="dataSourceWriterbase" />
+	</bean>
+	<!-- 事务管理器 -->
+
+
+	<bean
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+		abstract="true">
+		<property name="transactionManager">
+			<bean
+				class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+				<property name="dataSource">
+					<ref bean="dataSourcebase" />
+				</property>
+			</bean>
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="find*">readOnly</prop>
+				<prop key="get*">readOnly</prop>
+				<prop key="select*">readOnly</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+		abstract="true">
+		<property name="transactionManager">
+			<bean
+				class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+				<property name="dataSource">
+					<ref bean="dataSourceWriterbase" />
+				</property>
+			</bean>
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="add*">PROPAGATION_REQUIRED</prop>
+				<prop key="edit*">PROPAGATION_REQUIRED</prop>
+				<prop key="remove*">PROPAGATION_REQUIRED</prop>
+				<prop key="insert*">PROPAGATION_REQUIRED</prop>
+				<prop key="update*">PROPAGATION_REQUIRED</prop>
+				<prop key="del*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<import resource="spring/spring-dao.xml" />
+	
+	<context:component-scan base-package="cn.leadeon.*" />
+	
+	<!-- dubbo公共配置设置 -->
+	<dubbo:application name="cctv-users-server" owner="lixuming"
+		organization="leadeon" />
+
+	<dubbo:registry protocol="zookeeper" address="${dubbo.registry.address}" file="${dubbo.registry.file}"/>
+
+	<dubbo:provider timeout="28000" retries="0" />
+
+	<!-- <dubbo:monitor protocol="registry"/> -->
+
+	<dubbo:protocol name="dubbo" port="${dubbo.protocol.port}"
+		server="netty" client="netty" serialization="dubbo" charset="UTF-8"
+		threadpool="fixed" threads="500" queues="0" buffer="8192" accepts="0"
+		payload="8388608" />
+	
+	
+	<import resource="spring/spring-service.xml" />
+	<import resource="spring/dubbo-provider.xml" />
+	<import resource="spring/redisson.xml" />
+	
+</beans>
